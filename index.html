@@ -109,6 +109,8 @@ p { margin: 0; }
 .num5 { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 
 .tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.card.shared { margin-top: 16px; }
+@media (min-width: 900px) { .card.shared .tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; } }
 .tasks li { padding: 9px 0; border-bottom: 1px solid var(--line); }
 .empty { padding: 14px 0; color: var(--muted); font-size: 13.5px; }
 .trow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; justify-content: space-between; }
@@ -208,6 +210,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
     </div>
     <p class="hint">할 일 오른쪽의 "옮기기"를 고르면 다른 파트로 넘어가요. 난이도 칸이 주황이면 4~5칸(어려운 일)이에요.</p>
     <div class="cards" id="cards"></div>
+    <div id="shared"></div>
     <p class="note">난이도는 5칸 중 몇 칸이에요. 1~2칸은 수업 예제 그대로, 3칸은 예제를 고쳐 써야 하고, 4~5칸은 처음 해 보거나 수업에 없는 일이에요. 파트 난이도는 할 일 난이도의 평균이에요.</p>
 
     <div class="discuss">
@@ -293,6 +296,8 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
     { n: 3, sym: '③', name: '방화벽 · 테스트', zone: '리눅스 방화벽/라우터 VM', first: 'WSL이나 리눅스 VM 한 대에서 테스트 모드(DRY_RUN)로 block_ip부터 만들어요.' },
     { n: 4, sym: '④', name: '대응 · 리포트', zone: 'VLAN20 보안_콘솔_서버 · DB_서버', first: '②가 줄 탐지 결과 JSON 샘플로 등급 분류부터 만들어요.' }
   ];
+  var SHARED = { n: 5, sym: '★', name: '같이 할 일', zone: '4명이 함께 · 합친 뒤에 해요', first: '' };
+  var ALLP = PARTS.concat([SHARED]);
   var TASKS = [
     { id: 'a1', home: 1, t: '퇴사자·이동자 권한 회수 콘솔', c: '3과목', d: 3, u: '권한 회수 자동화(Day4): 퇴사는 즉시 회수, 관리자 권한은 승인 필요, 그 외는 유예 후 회수로 나누고 revoke_permission으로 회수. 민감 권한 목록은 sensitive_permissions.json으로 분리, 회수 로그(log_revocation) 남기기. 이동자 역할 변경은 3과목 Day1 assign_role·remove_role', w: '퇴사·관리자·그 외 3가지로 갈라지는 분기를 짜야 하지만 수업 예제와 거의 같아요' },
     { id: 'a5', home: 1, t: '권한 요청·승인 (SLA 포함)', c: '3과목', d: 3, u: '프로세스 자동화(Day2): create_request, approve_request, reject_request, 상태 전이(requested → reviewing → approved/rejected → granted), SLA 초과 감지, 관리자 권한은 이중 승인, requests.json 저장. 회수 승인에도 같은 모듈을 다시 써요', w: '상태가 규칙대로만 바뀌게 검증하고 SLA 시간을 계산해야 해요. 수업 코드는 있어요' },
@@ -316,7 +321,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
     { id: 'c7', home: 3, t: 'IP 차단·해제', c: '5과목', d: 4, u: '계정 잠금·접근 차단 자동화(Day2): block_ip(ip, reason) - 사유 필수, IPv4 형식 확인, 테스트 모드 DRY_RUN, iptables 규칙을 맨 위에 삽입(-I), 결과를 로그에 기록. unblock_ip는 해제 사유 필수', w: '수업은 서버 자신을 향한 INPUT 체인을 써요. 우리는 구역 사이를 지나는 트래픽을 막아야 해서 FORWARD 체인으로 바꿔 써야 하고, 이 부분은 수업에 없어요' },
     { id: 'c3', home: 3, t: '조치 이력 기록 (log_action)', c: '5과목', d: 1, u: '계정 잠금·접근 차단 자동화(Day2): log_action으로 계정 잠금·IP 차단 같은 모든 조치 이력을 containment_log.json에 누적. ①과 ④도 이 함수를 불러 써요', w: '수업 함수로 JSON 파일에 쌓기만 해요' },
     { id: 'c5', home: 3, t: 'VM·망 구축 주도 (통합 때)', c: '2과목', d: 5, u: '2과목 IP 라우팅(Day2): 서브넷·CIDR, 라우팅 테이블, 기본 게이트웨이, VLAN. 방화벽(Day4) 실습의 라우터를 방화벽으로 구성하기(NAT)를 참고. VM 만드는 방법은 슬라이드에 없어요', w: '수업 밖이에요. 통신이 안 될 때 원인(IP, 라우팅, 방화벽)을 찾기 어려워요' },
-    { id: 'c6', home: 3, t: '테스트 시나리오·결과, README', c: '5과목', d: 3, u: '티켓·알림·에스컬레이션(Day3) 실습의 테스트 시나리오 표(TC-01~07 형식)와 결과 정리 파일(day03_test_result.md) 방식', w: '코드는 적지만 통합 때 실제로 돌려 보며 결과를 적어야 해요' },
+    { id: 'c6', home: 5, t: '테스트 시나리오·결과, README', c: '5과목', d: 3, u: '티켓·알림·에스컬레이션(Day3) 실습의 테스트 시나리오 표(TC-01~07 형식)와 결과 정리 파일(day03_test_result.md) 방식', w: '코드는 적지만 통합 때 실제로 돌려 보며 결과를 적어야 해요' },
 
     { id: 'e1', home: 4, t: '대응 등급 분류', c: '5과목', d: 3, u: 'SOAR 개념·플레이북 구조(Day1): ②에게 공통 이벤트 형식(event_id, user, event_type, risk_score, priority, asset, impact_scope)을 받아 classify_event로 즉시 자동조치 / 승인 후 조치 / 모니터링만 결정', w: '수업 함수가 있고 조건 3가지로 나누기만 하면 돼요' },
     { id: 'e2', home: 4, t: '플레이북·이벤트 상태 관리', c: '5과목', d: 4, u: 'SOAR 개념·플레이북 구조(Day1): 트리거·조건·액션·승인으로 플레이북 구성, match_playbook(event_type + 대응 등급)으로 선택, 이벤트 상태(detected → triaged → responded → reported)와 history 관리', w: '이벤트 유형·등급·상태 조합에 따라 갈라지는 분기가 많아요' },
@@ -347,7 +352,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
   function $(s) { return document.querySelector(s); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pips(n, hard) { var h = ''; for (var i = 1; i <= 5; i++) h += '<span class="pip' + (i <= n ? ' on' + (hard ? ' hard' : '') : '') + '"></span>'; return h; }
-  function partOf(t) { var m = state.move[t.id]; return (m >= 1 && m <= 4) ? m : t.home; }
+  function partOf(t) { var m = state.move[t.id]; return (m >= 1 && m <= 5) ? m : t.home; }
 
   /* ---------- build static markup ---------- */
   $('#cards').innerHTML = PARTS.map(function (p) {
@@ -361,13 +366,19 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
     '</article>';
   }).join('');
 
+  $('#shared').innerHTML = '<article class="card shared" id="card-5">' +
+      '<div class="card-top"><div class="num" aria-hidden="true">★</div>' +
+      '<div><h3>같이 할 일</h3><div class="zone">' + esc(SHARED.zone) + '</div></div></div>' +
+      '<div class="summary" id="sum-5"></div>' +
+      '<ul class="tasks" id="tasks-5"></ul></article>';
+
   $('#todo').innerHTML = TODOS.map(function (t) {
     return '<li id="li-' + t.id + '"><label><input type="checkbox" id="cb-' + t.id + '"><span>' + esc(t.text) + '</span></label></li>';
   }).join('');
 
   /* ---------- render ---------- */
   function renderTasks() {
-    PARTS.forEach(function (p) {
+    ALLP.forEach(function (p) {
       var list = TASKS.filter(function (t) { return partOf(t) === p.n; });
       var sum = list.reduce(function (a, t) { return a + t.d; }, 0);
       var hard = list.filter(function (t) { return t.d >= 4; }).length;
@@ -378,7 +389,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
           '<span>어려운 일 <span class="hardn">' + hard + '개</span></span>'
         : '<span>할 일이 없어요</span>';
       $('#tasks-' + p.n).innerHTML = list.length ? list.map(function (t) {
-        var opts = '<option value="">옮기기</option>' + PARTS.map(function (q) {
+        var opts = '<option value="">옮기기</option>' + ALLP.map(function (q) {
           return '<option value="' + q.n + '"' + (q.n === p.n ? ' disabled' : '') + '>' + q.sym + ' ' + esc(q.name) + '</option>';
         }).join('');
         var open = (allOpen || openSet[t.id]) ? ' open' : '';
@@ -439,7 +450,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
     var sel = e.target;
     if (!sel.classList || !sel.classList.contains('mv')) return;
     var n = parseInt(sel.value, 10);
-    if (!(n >= 1 && n <= 4)) return;
+    if (!(n >= 1 && n <= 5)) return;
     var id = sel.getAttribute('data-id');
     state.move[id] = n; renderDynamic(); write('move-' + id, { part: n });
   });
