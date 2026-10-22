@@ -1,0 +1,564 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>html{color-scheme:light}body{margin:0}</style><script>(function(){var t="dark";try{t=localStorage.getItem("bteam-theme")||"dark"}catch(e){}document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark")})()</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script></head><body><title>B조 역할 분담판</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky-free tab bar over four short panels; roles panel = timeline strip, four part cards whose task rows show only name, course and difficulty (details fold open), then a discussion box. */
+:root {
+  --bg: #f3f6f7;
+  --surface: #ffffff;
+  --ink: #15202a;
+  --muted: #56646f;
+  --line: #dbe2e7;
+  --accent: #0d6a89;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff0f5;
+  --warn: #a35f00;
+  --warn-soft: #fbf0d9;
+  --code-bg: #eaeff2;
+  --font-body: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151a;
+    --surface: #172029;
+    --ink: #e8eef2;
+    --muted: #93a3af;
+    --line: #28343e;
+    --accent: #5db6d3;
+    --accent-ink: #0b1a21;
+    --accent-soft: #163340;
+    --warn: #e8a63c;
+    --warn-soft: #2d2616;
+    --code-bg: #101920;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151a;
+  --surface: #172029;
+  --ink: #e8eef2;
+  --muted: #93a3af;
+  --line: #28343e;
+  --accent: #5db6d3;
+  --accent-ink: #0b1a21;
+  --accent-soft: #163340;
+  --warn: #e8a63c;
+  --warn-soft: #2d2616;
+  --code-bg: #101920;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-size: 18px; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.sub { color: var(--muted); max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip { font-size: 13px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+
+.tabs { display: flex; gap: 4px; margin: 26px 0 22px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { font: inherit; font-weight: 500; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel[hidden] { display: none; }
+
+.steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin-bottom: 14px; }
+.step { padding: 10px 12px; border-top: 3px solid var(--line); }
+.step.dev, .step.test { border-top-color: var(--accent); }
+.step .t { font-weight: 600; font-size: 14px; }
+.step .d { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.flow { color: var(--muted); font-size: 14px; margin-bottom: 26px; }
+.flow b { color: var(--ink); font-weight: 600; }
+.flow .arrow { margin: 0 4px; color: var(--accent); }
+
+.board-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 12px; }
+.board-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.board-tools .count { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-right: 6px; }
+.ghost { font: inherit; font-size: 13px; color: var(--accent); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.ghost:hover { border-color: var(--accent); }
+.hint { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+
+.cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: stretch; }
+@media (min-width: 900px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-top { display: flex; gap: 12px; align-items: flex-start; }
+.num { font-size: 30px; line-height: 1; color: var(--accent); font-weight: 700; flex: none; }
+.card-top h3 { margin: 0; font-size: 17px; line-height: 1.3; }
+.zone { font-size: 12.5px; color: var(--muted); }
+.summary { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; padding: 8px 12px; background: var(--bg); border-radius: 8px; font-size: 13px; color: var(--muted); }
+.summary b { color: var(--ink); font-weight: 600; }
+.summary .hardn { color: var(--warn); font-weight: 600; }
+
+.meter { display: inline-flex; align-items: center; gap: 7px; }
+.pips { display: inline-flex; gap: 3px; }
+.pip { width: 14px; height: 8px; border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1px var(--muted); }
+.pip.on { background: var(--accent); box-shadow: none; }
+.pip.on.hard { background: var(--warn); }
+.num5 { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.tasks li { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.empty { padding: 14px 0; color: var(--muted); font-size: 13.5px; }
+.trow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; justify-content: space-between; }
+.tmain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; flex: 1 1 180px; }
+.tn { font-weight: 600; font-size: 14.5px; }
+.crs { font-size: 11.5px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 0 8px; white-space: nowrap; }
+.tmeta { display: flex; align-items: center; gap: 10px; flex: none; }
+select.mv { font: inherit; font-size: 12.5px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; }
+details { font-size: 13px; }
+details summary { cursor: pointer; color: var(--muted); padding: 2px 0; width: fit-content; }
+details summary:hover { color: var(--accent); }
+.use { display: block; color: var(--muted); margin-top: 3px; }
+.use b { color: var(--ink); font-weight: 600; }
+.tasks details { margin-top: 2px; }
+.firstd { border-top: 0; }
+.assign { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: auto; }
+input[type="text"] { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+input[type="text"]::placeholder { color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); margin-top: 18px; max-width: 70ch; }
+.local-note { font-size: 13px; color: var(--warn); margin-top: 10px; }
+
+.discuss { margin-top: 22px; background: var(--warn-soft); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+.discuss h2 { margin-bottom: 4px; }
+.discuss > p { font-size: 13.5px; color: var(--muted); margin-bottom: 12px; }
+.discuss ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 12px; }
+.discuss li b { font-weight: 600; }
+.discuss li span { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12.5px; color: var(--muted); font-weight: 600; background: var(--surface); }
+tr:last-child td { border-bottom: 0; }
+td.k { font-family: var(--font-mono); font-size: 13px; color: var(--accent); white-space: nowrap; }
+td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.block { margin-top: 22px; }
+.block h3 { font-size: 15px; margin: 0 0 8px; }
+.code { position: relative; background: var(--code-bg); border-radius: 8px; padding: 14px; overflow-x: auto; }
+.code pre { margin: 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; padding-right: 64px; }
+.copy { position: absolute; top: 8px; right: 8px; font: inherit; font-size: 12px; color: var(--accent); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 2px 9px; cursor: pointer; }
+.who { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
+.todo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.todo li { border-bottom: 1px solid var(--line); }
+.todo li:last-child { border-bottom: 0; }
+.todo label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; cursor: pointer; }
+.todo input { margin-top: 5px; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+.todo .done span { color: var(--muted); text-decoration: line-through; }
+
+@media (max-width: 720px) {
+  .steps { grid-template-columns: 1fr 1fr; gap: 8px; }
+  h1 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tab { transition: color .15s, border-color .15s; }
+}
+
+.theme-btn { position: fixed; top: max(12px, env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 20; font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.theme-btn:hover { border-color: var(--accent); }
+.theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <button class="theme-btn" id="theme-btn" type="button" aria-label="화면 색 바꾸기"></button>
+  <header>
+    <h1>B조 역할 분담판</h1>
+    <p class="sub">4명이 4개 파트를 맡아요. 담당자 칸, 파트 옮기기, 체크리스트는 모두 같이 보고 같이 고쳐요.</p>
+    <div class="chips">
+      <span class="chip">4과목 탐지 · 5과목 대응 · 2과목 방화벽 활용</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="보기 선택">
+    <button class="tab" role="tab" id="tab-roles" aria-controls="panel-roles" aria-selected="true" data-tab="roles">역할</button>
+    <button class="tab" role="tab" id="tab-schema" aria-controls="panel-schema" aria-selected="false" data-tab="schema">로그 형식</button>
+    <button class="tab" role="tab" id="tab-formats" aria-controls="panel-formats" aria-selected="false" data-tab="formats">주고받는 형식</button>
+    <button class="tab" role="tab" id="tab-todo" aria-controls="panel-todo" aria-selected="false" data-tab="todo">정할 것</button>
+  </nav>
+
+  <section class="panel" id="panel-roles" role="tabpanel" aria-labelledby="tab-roles">
+    <div class="steps" aria-label="일정">
+      <div class="step"><div class="t">요구사항 1일</div><div class="d">문서로 정리</div></div>
+      <div class="step"><div class="t">설계 1일</div><div class="d">구성도, 로그 형식</div></div>
+      <div class="step dev"><div class="t">개발 3일</div><div class="d">각자 PC에서, 샘플 파일로</div></div>
+      <div class="step test"><div class="t">테스트 1일</div><div class="d">서버에 올려 합치기 (③ 주도)</div></div>
+      <div class="step"><div class="t">최종 발표</div><div class="d">11.05</div></div>
+    </div>
+    <p class="flow">누가 누구에게 넘기나: <b>① ③</b> 로그 <span class="arrow">→</span> <b>②</b> 탐지 결과 <span class="arrow">→</span> <b>④</b> 조치 요청 <span class="arrow">→</span> <b>① ③</b> 실행</p>
+
+    <div class="board-head">
+      <h2>파트별 할 일과 담당자</h2>
+      <div class="board-tools">
+        <span class="count" id="assigned-count">배정 0 / 4</span>
+        <button class="ghost" id="toggle-all" type="button">자세히 모두 펼치기</button>
+        <button class="ghost" id="reset-moves" type="button">처음 배치로</button>
+      </div>
+    </div>
+    <p class="hint">할 일 오른쪽의 "옮기기"를 고르면 다른 파트로 넘어가요. 난이도 칸이 주황이면 4~5칸(어려운 일)이에요.</p>
+    <div class="cards" id="cards"></div>
+    <p class="note">난이도는 5칸 중 몇 칸이에요. 1~2칸은 수업 예제 그대로, 3칸은 예제를 고쳐 써야 하고, 4~5칸은 처음 해 보거나 수업에 없는 일이에요. 파트 난이도는 할 일 난이도의 평균이에요.</p>
+
+    <div class="discuss">
+      <h2>같이 상의할 문제</h2>
+      <p>정하지 못한 것을 여기에 모았어요. 정해지면 지우거나 설계서에 옮겨요.</p>
+      <ol>
+        <li><b>가상 공격(테스트 로그)을 어떻게 만들지</b>
+          <span>공격은 수업에서 배우지 않았어요. 탐지와 차단을 보여 주려면 로그인 실패 반복, 새벽 접근, OCC 접근 시도 기록이 필요해요. (가) 로그 파일을 손으로 몇십 줄 만들어 쓴다. (나) 1과목 Python 반복문으로 가짜 로그를 자동으로 만든다. 누가 맡을지도 같이 정해요.</span></li>
+        <li><b>초동 대응 리포트에 LLM을 쓸지</b>
+          <span>5과목 수업은 사고 개요와 후속 조치 문단만 LLM이 쓰고, 탐지 근거·조치 내역·현재 상태는 기존 데이터로 채워요. LLM 없이 템플릿만으로도 만들 수 있어요.</span></li>
+      </ol>
+    </div>
+    <p class="local-note" id="local-note" hidden>이 보기에서는 공유 저장을 쓸 수 없어요. 입력한 내용은 이 브라우저에만 남아요.</p>
+  </section>
+
+  <section class="panel" id="panel-schema" role="tabpanel" aria-labelledby="tab-schema" hidden>
+    <h2 style="margin-bottom:12px">로그 형식</h2>
+    <p class="sub" style="margin-bottom:14px">① OCC와 ③ 방화벽이 남기는 로그의 필드예요. 2과목 정책 로그 필드에 source와 reason을 더했어요. ②는 이 로그를 읽어서 4과목에서 배운 공통 스키마(timestamp, user, source, event_type, detail)로 바꿔요. 한 줄이 로그 한 건이고, 파일은 한 줄에 JSON 하나(JSON Lines)로 저장해요.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>필드</th><th>뜻</th><th>예시</th><th>남기는 파트</th></tr></thead>
+        <tbody>
+          <tr><td class="k">timestamp</td><td>발생 시각 (ISO 8601)</td><td class="ex">2026-11-02T02:14:05</td><td>① ③</td></tr>
+          <tr><td class="k">source</td><td>로그를 남긴 곳</td><td class="ex">firewall / occ</td><td>① ③</td></tr>
+          <tr><td class="k">src_ip</td><td>출발지 IP</td><td class="ex">192.168.30.12</td><td>① ③</td></tr>
+          <tr><td class="k">dst_ip</td><td>목적지 IP</td><td class="ex">192.168.10.11</td><td>① ③</td></tr>
+          <tr><td class="k">user</td><td>계정 (없으면 -)</td><td class="ex">emp3</td><td>① ③</td></tr>
+          <tr><td class="k">role</td><td>역할 (없으면 -)</td><td class="ex">developer</td><td>①</td></tr>
+          <tr><td class="k">resource</td><td>접근 대상</td><td class="ex">occ/revoke</td><td>① ③</td></tr>
+          <tr><td class="k">action</td><td>시도한 동작</td><td class="ex">login / access / revoke</td><td>① ③</td></tr>
+          <tr><td class="k">result</td><td>결과</td><td class="ex">success / fail / deny</td><td>① ③</td></tr>
+          <tr><td class="k">reason</td><td>실패·차단 사유 (없으면 -)</td><td class="ex">bad_password</td><td>① ③</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="block">
+      <h3>예시 한 줄</h3>
+      <div class="code"><button class="copy" data-copy="ex-log" type="button">복사</button><pre id="ex-log">{"timestamp":"2026-11-02T02:14:05","source":"firewall","src_ip":"192.168.30.12","dst_ip":"192.168.10.11","user":"-","role":"-","resource":"occ/revoke","action":"access","result":"deny","reason":"policy_default_deny"}</pre></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-formats" role="tabpanel" aria-labelledby="tab-formats" hidden>
+    <h2 style="margin-bottom:12px">파트끼리 주고받는 형식</h2>
+    <p class="sub">로그 다음으로 맞출 것은 두 가지예요. 이 둘만 정해 두면 각자 샘플 파일로 개발할 수 있어요.</p>
+    <div class="block">
+      <h3>탐지 결과</h3>
+      <p class="who">② 이상 탐지가 만들고, ④ 대응·리포트가 읽어요.</p>
+      <div class="code"><button class="copy" data-copy="ex-detect" type="button">복사</button><pre id="ex-detect">{"event_id":"E-0001","detected_at":"2026-11-02T02:15:00","rule":"failed_login_5_in_10min","user":"emp3","src_ip":"192.168.30.12","risk_score":80,"evidence":["2026-11-02T02:10:11","2026-11-02T02:14:05"]}</pre></div>
+    </div>
+    <div class="block">
+      <h3>조치 요청</h3>
+      <p class="who">④ 대응·리포트가 만들고, ① OCC(계정 조치) 또는 ③ 방화벽(IP 차단)이 읽어요.</p>
+      <div class="code"><button class="copy" data-copy="ex-action" type="button">복사</button><pre id="ex-action">{"event_id":"E-0001","action":"block_ip","target":"192.168.30.12","tier":"auto","reason":"failed_login_5_in_10min","dry_run":false}</pre></div>
+    </div>
+    <div class="block">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>값</th><th>가능한 내용</th></tr></thead>
+          <tbody>
+            <tr><td class="k">action</td><td>lock_account / unlock_account / terminate_session (① 실행), block_ip (③ 실행)</td></tr>
+            <tr><td class="k">tier</td><td>auto 즉시 자동 조치 / approval 승인 후 조치 / monitor 모니터링만</td></tr>
+            <tr><td class="k">dry_run</td><td>true면 실제 조치 없이 기록만 남기는 테스트 모드</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-todo" role="tabpanel" aria-labelledby="tab-todo" hidden>
+    <h2 style="margin-bottom:12px">오늘 정할 것</h2>
+    <p class="sub" style="margin-bottom:14px">정해진 것은 체크해 주세요. 모두 같은 화면을 봐요.</p>
+    <ul class="todo" id="todo"></ul>
+    <p class="local-note" id="local-note-2" hidden>이 보기에서는 공유 저장을 쓸 수 없어요. 체크한 내용은 이 브라우저에만 남아요.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  /* PARTS = 파트 정보, TASKS = 할 일 (home = 처음 배치, t 이름, c 과목, d 난이도 1~5, u 수업 내용, w 난이도 이유) */
+  var PARTS = [
+    { n: 1, sym: '①', name: 'OCC', zone: 'VLAN10 OCC · VLAN30 개발팀', first: '3과목 RBAC 매트릭스로 계정 JSON부터 만들어요.' },
+    { n: 2, sym: '②', name: '이상 탐지', zone: 'VLAN20 로그_서버', first: '샘플 로그 20줄을 만들어 룰 하나부터 돌려 봐요. ④ 담당이 결과를 받아 쓰니 출력 형식을 같이 확인해요.' },
+    { n: 3, sym: '③', name: '방화벽 · 테스트', zone: '리눅스 방화벽/라우터 VM', first: 'WSL이나 리눅스 VM 한 대에서 테스트 모드(DRY_RUN)로 block_ip부터 만들어요.' },
+    { n: 4, sym: '④', name: '대응 · 리포트', zone: 'VLAN20 보안_콘솔_서버 · DB_서버', first: '②가 줄 탐지 결과 JSON 샘플로 등급 분류부터 만들어요.' }
+  ];
+  var TASKS = [
+    { id: 'a1', home: 1, t: '퇴사자·이동자 권한 회수 콘솔', c: '3과목', d: 3, u: '권한 회수 자동화(Day4): 퇴사는 즉시 회수, 관리자 권한은 승인 필요, 그 외는 유예 후 회수로 나누고 revoke_permission으로 회수. 민감 권한 목록은 sensitive_permissions.json으로 분리, 회수 로그(log_revocation) 남기기. 이동자 역할 변경은 3과목 Day1 assign_role·remove_role', w: '퇴사·관리자·그 외 3가지로 갈라지는 분기를 짜야 하지만 수업 예제와 거의 같아요' },
+    { id: 'a5', home: 1, t: '권한 요청·승인 (SLA 포함)', c: '3과목', d: 3, u: '프로세스 자동화(Day2): create_request, approve_request, reject_request, 상태 전이(requested → reviewing → approved/rejected → granted), SLA 초과 감지, 관리자 권한은 이중 승인, requests.json 저장. 회수 승인에도 같은 모듈을 다시 써요', w: '상태가 규칙대로만 바뀌게 검증하고 SLA 시간을 계산해야 해요. 수업 코드는 있어요' },
+    { id: 'a2', home: 1, t: '계정·권한 데이터 (JSON)', c: '3·1과목', d: 1, u: 'RBAC 매트릭스(Day1): roles.json, user_roles.json, 부서×시스템 권한표 policy.json을 JSON 파일로 만들고 읽어 오기. 1과목 JSON 읽고 쓰기', w: '수업의 표를 JSON 파일로 옮기는 일이에요' },
+    { id: 'a6', home: 1, t: '접근 권한 판정·로그 남기기', c: '3·2과목', d: 3, u: 'RBAC 매트릭스(Day1) evaluate_access와 권한 회수(Day4) evaluate_full_access: 정책 매트릭스 → 조건부 접근(시간·IP) → 임시권한 만료 확인 순서로 허용·거부를 정하고, 결과를 2과목 정책 로그 필드로 한 줄씩 기록', w: '수업에 같은 함수가 있어요. 우리는 잠긴 계정과 퇴사자를 먼저 거부하는 조건과 로그 기록만 더해요' },
+    { id: 'a3', home: 1, t: '계정 잠금·해제, 세션 종료', c: '5과목', d: 3, u: '계정 잠금·접근 차단 자동화(Day2): lock_account, unlock_account(해제 사유 필수), terminate_session, VIP 계정 승인 예외', w: '함수는 수업에 있고, VIP 예외와 해제 사유 필수 조건만 더 붙여요' },
+    { id: 'a7', home: 1, t: '정기 권한 점검 (미사용·부서 불일치)', c: '3과목', d: 3, u: '정기점검·과다권한(Day3): detect_unused_permissions(90일 미사용), detect_department_mismatch(권한 부여 당시 부서와 현재 부서 비교), 만료된 예외 권한을 찾아 과다권한 후보 리포트(JSON) 만들기', w: '세 가지 점검 함수를 만들어 JSON 하나로 합쳐요. 수업 코드가 있어요. 부서를 옮긴 이동자를 찾아내는 기능이에요' },
+    { id: 'a8', home: 1, t: '접근통제 주간 리포트', c: '3과목', d: 2, u: '결과 리포트 자동화·통합(Day5): generate_weekly_report로 RBAC 상태, 정책 위반, 요청 처리 현황, 과다권한, 회수 이력 5개 영역을 합쳐 md 파일로 저장', w: '각 기능이 남긴 JSON을 읽어 합치기만 해요' },
+    { id: 'c4', home: 1, t: '알림·에스컬레이션', c: '5과목', d: 3, u: '티켓·알림·에스컬레이션(Day3): 담당자에게 알리고, 응답 시간(SLA 10분) 안에 응답이 없으면 2차 담당자에게 알리는 escalate 함수. 설정은 escalation_rules.json, 중복 알림 방지', w: '시간 계산과 중복 방지 조건만 짜면 돼요. 수업 코드가 있어요' },
+
+    { id: 'b1', home: 2, t: '로그 수집·정규화', c: '4과목', d: 3, u: '로그·이벤트·알림 개념(Day1): 로그마다 다른 형식을 공통 스키마(timestamp, user, source, event_type, detail)로 바꾸는 normalize 함수. 사용자가 없으면 None', w: '형식이 다른 로그를 하나로 맞추고 빈 값을 처리해야 해요. 수업 예제는 있어요' },
+    { id: 'b2', home: 2, t: '탐지 룰', c: '4과목', d: 3, u: '이벤트 유형 분류·탐지 & 상관분석(Day2~3): detect_bruteforce(로그인 실패 반복), detect_offhour_login(새벽 로그인), detect_unauthorized_access(비인가 접근). 퇴사자 계정 접근은 비인가 접근 탐지를 응용한 것으로 수업에는 없어요', w: '"10분 안에 5번" 같은 시간 윈도우 계산이 처음엔 헷갈려요' },
+    { id: 'b6', home: 2, t: '블랙리스트(IOC) 매칭', c: '4과목', d: 2, u: '탐지 & 상관분석(Day3): match_ioc로 로그의 IP·계정을 차단 목록과 비교', w: '목록과 비교하는 함수 하나예요' },
+    { id: 'b3', home: 2, t: '상관분석', c: '4과목', d: 4, u: '탐지 & 상관분석(Day3): 사용자·IP·시간을 기준으로 이벤트를 묶고 시간순 정렬 (예: 로그인 실패 급증 → 로그인 성공 → 비인가 접근)', w: '이벤트 여러 개를 사용자·IP·시간으로 묶고 순서를 비교하는 로직이라 코드가 길어져요' },
+    { id: 'b4', home: 2, t: '위험점수 산정', c: '4과목', d: 2, u: '탐지 & 상관분석(Day3): 탐지 항목별 가중치를 더하는 calculate_risk_score와 위험 수준(낮음·주의·높음·심각) 판정', w: '항목별 점수를 더하고 구간으로 나누기만 해요' },
+    { id: 'b7', home: 2, t: '이벤트 유형·우선순위 분류', c: '4과목', d: 2, u: '이벤트 유형 분류(Day2): 비정상 로그인, 트래픽 급증, 비인가 접근, SaaS 이상 사용, 악성 행위 징후로 구분. 요약·우선순위 분류(Day5): 위험점수, 상관분석 매칭 여부, 자산 중요도로 high/medium/low', w: '표의 기준대로 조건을 나누기만 해요' },
+    { id: 'b5', home: 2, t: '오탐 튜닝', c: '4과목', d: 4, u: '오탐·미탐 & 탐지룰 튜닝(Day4): 라벨링된 테스트셋으로 evaluate_detector(정밀도·재현율) 측정, 오탐 3건 원인 기록, 예외 목록(exempt_users)·임계값 조정, 튜닝 전후 비교표', w: '정답 라벨이 달린 샘플 로그가 필요하고, 기준값을 바꿔 가며 정밀도·재현율이 좋아지는지 반복 확인해야 해요' },
+
+    { id: 'c1', home: 3, t: '구역 간 정책 (기본 차단)', c: '2과목', d: 5, u: '2과목 방화벽(Day4): 룰 구성(출발지·목적지 IP, 포트, 프로토콜, 허용/차단), 룰 순서, 기본 불허(deny by default), 화이트리스트 원칙. 제로트러스트의 마이크로 세그멘테이션(구역별로 필요한 통신만 허용)과 망구성·VLAN', w: '룰 순서가 틀리면 전부 막히거나 뚫려요. 리눅스 방화벽(iptables)을 처음 만져요' },
+    { id: 'c2', home: 3, t: '정책 로그 기록', c: '2과목', d: 3, u: '2과목 정책 로그(Day7): 허용·차단 결과를 timestamp, user, source_ip, resource, action, decision(ALLOW/DENY), reason 필드로 남기기. 우리 로그 형식에 맞춰 쓰면 돼요', w: '방화벽 동작마다 로그 한 줄이 남게 하고 필드 형식을 맞춰야 해요' },
+    { id: 'c7', home: 3, t: 'IP 차단·해제', c: '5과목', d: 4, u: '계정 잠금·접근 차단 자동화(Day2): block_ip(ip, reason) - 사유 필수, IPv4 형식 확인, 테스트 모드 DRY_RUN, iptables 규칙을 맨 위에 삽입(-I), 결과를 로그에 기록. unblock_ip는 해제 사유 필수', w: '수업은 서버 자신을 향한 INPUT 체인을 써요. 우리는 구역 사이를 지나는 트래픽을 막아야 해서 FORWARD 체인으로 바꿔 써야 하고, 이 부분은 수업에 없어요' },
+    { id: 'c3', home: 3, t: '조치 이력 기록 (log_action)', c: '5과목', d: 1, u: '계정 잠금·접근 차단 자동화(Day2): log_action으로 계정 잠금·IP 차단 같은 모든 조치 이력을 containment_log.json에 누적. ①과 ④도 이 함수를 불러 써요', w: '수업 함수로 JSON 파일에 쌓기만 해요' },
+    { id: 'c5', home: 3, t: 'VM·망 구축 주도 (통합 때)', c: '2과목', d: 5, u: '2과목 IP 라우팅(Day2): 서브넷·CIDR, 라우팅 테이블, 기본 게이트웨이, VLAN. 방화벽(Day4) 실습의 라우터를 방화벽으로 구성하기(NAT)를 참고. VM 만드는 방법은 슬라이드에 없어요', w: '수업 밖이에요. 통신이 안 될 때 원인(IP, 라우팅, 방화벽)을 찾기 어려워요' },
+    { id: 'c6', home: 3, t: '테스트 시나리오·결과, README', c: '5과목', d: 3, u: '티켓·알림·에스컬레이션(Day3) 실습의 테스트 시나리오 표(TC-01~07 형식)와 결과 정리 파일(day03_test_result.md) 방식', w: '코드는 적지만 통합 때 실제로 돌려 보며 결과를 적어야 해요' },
+
+    { id: 'e1', home: 4, t: '대응 등급 분류', c: '5과목', d: 3, u: 'SOAR 개념·플레이북 구조(Day1): ②에게 공통 이벤트 형식(event_id, user, event_type, risk_score, priority, asset, impact_scope)을 받아 classify_event로 즉시 자동조치 / 승인 후 조치 / 모니터링만 결정', w: '수업 함수가 있고 조건 3가지로 나누기만 하면 돼요' },
+    { id: 'e2', home: 4, t: '플레이북·이벤트 상태 관리', c: '5과목', d: 4, u: 'SOAR 개념·플레이북 구조(Day1): 트리거·조건·액션·승인으로 플레이북 구성, match_playbook(event_type + 대응 등급)으로 선택, 이벤트 상태(detected → triaged → responded → reported)와 history 관리', w: '이벤트 유형·등급·상태 조합에 따라 갈라지는 분기가 많아요' },
+    { id: 'e7', home: 4, t: '승인 게이트 (자동·승인·보류)', c: '5과목', d: 3, u: '초동대응 리포트·승인 게이트(Day4): execute_action 공통 게이트 - 위험등급(low/high/critical, config/risk_levels.json)에 따라 자동 실행, 승인 대기, 보류로 나누기. 가역성·영향범위·확실성 기준, VIP 예외', w: '위험등급별로 실행·대기·보류를 가르는 분기가 핵심이에요. 수업 코드가 있어요' },
+    { id: 'e8', home: 4, t: '오탐 대응 (복구·기록)', c: '5·4과목', d: 3, u: '초동대응 리포트·오탐 대응(Day4): handle_false_positive - 정상으로 확인되면 계정 복구, 오탐 사례 기록, 피드백 데이터 저장. 이 데이터는 4과목 evaluate_detector의 라벨 데이터로 쓰여요', w: '복구, 기록, 저장을 순서대로 묶고 ①의 unlock_account를 불러야 해요' },
+    { id: 'e6', home: 4, t: '티켓 생성·상태 갱신', c: '5과목', d: 3, u: '티켓·알림·에스컬레이션(Day3): create_ticket(플레이북과 조치 결과로 티켓 본문 만들기, 모의 API)과 sync_ticket_status(이벤트 상태에 맞춰 open → in_progress → resolved → closed)', w: '함수는 수업에 있고, 조치 결과에 맞춰 상태만 바꿔요' },
+    { id: 'e3', home: 4, t: '초동 대응 리포트 생성', c: '5과목', d: 3, u: '초동대응 리포트(Day4): collect_incident_data로 데이터를 모아 5대 구성요소(사고 개요, 탐지 근거, 조치 내역, 현재 상태, 후속 조치) 템플릿을 채우기. 사고 개요·후속 조치 문단만 LLM(1과목). 기술팀용·경영진용 두 가지로 저장', w: '템플릿에 데이터를 채우는 일이고, LLM은 두 문단에만 써요' },
+    { id: 'e5', home: 4, t: '①·③ 조치 호출 연결', c: '5과목', d: 4, u: 'SOAR 개념·플레이북 구조(Day1): 4단계(Detect → Triage → Respond → Report)를 이어서, 승인 게이트를 거친 조치를 ①의 계정 잠금과 ③의 IP 차단 함수로 호출. 수업(Day3)도 main.py로 묶어도 된다고 안내해요', w: '다른 파트 코드와 형식이 안 맞으면 동작하지 않아요. 합칠 때 오류가 나기 쉬워요' }
+  ];
+  var TODOS = [
+    { id: 't1', text: '파트별 담당자 이름 정하기' },
+    { id: 't2', text: '로그 형식(필드) 확정' },
+    { id: 't3', text: '탐지 결과와 조치 요청 형식 확정' },
+    { id: 't4', text: '방화벽 VM에 보안 서버 기능을 합칠지, 보안 서버를 따로 둘지' },
+    { id: 't5', text: '인사팀(VLAN40)의 OCC 접근을 허용할지' },
+    { id: 't6', text: 'IP 대역 (192.168.10 / 20 / 30 / 40 . 0 / 24 초안 사용 여부)' },
+    { id: 't7', text: '통합·테스트 날짜와 중간 점검일' },
+    { id: 't8', text: '가상 공격(테스트 로그) 만드는 방법과 담당' }
+  ];
+
+  var state = { assign: {}, todo: {}, move: {} };
+  var db = null;
+  var readOnly = false;
+  var queues = {};
+  var allOpen = false;
+  var openSet = {};
+
+  function $(s) { return document.querySelector(s); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pips(n, hard) { var h = ''; for (var i = 1; i <= 5; i++) h += '<span class="pip' + (i <= n ? ' on' + (hard ? ' hard' : '') : '') + '"></span>'; return h; }
+  function partOf(t) { var m = state.move[t.id]; return (m >= 1 && m <= 4) ? m : t.home; }
+
+  /* ---------- build static markup ---------- */
+  $('#cards').innerHTML = PARTS.map(function (p) {
+    return '<article class="card" id="card-' + p.n + '">' +
+      '<div class="card-top"><div class="num" aria-hidden="true">' + p.sym + '</div>' +
+      '<div><h3>파트 ' + p.sym + ' ' + esc(p.name) + '</h3><div class="zone">' + esc(p.zone) + '</div></div></div>' +
+      '<div class="summary" id="sum-' + p.n + '"></div>' +
+      '<ul class="tasks" id="tasks-' + p.n + '"></ul>' +
+      '<details class="firstd"><summary>첫 걸음</summary><span class="use">' + esc(p.first) + '</span></details>' +
+      '<div class="assign"><input type="text" id="name-' + p.n + '" placeholder="담당자 이름" maxlength="20" aria-label="파트 ' + p.sym + ' 담당자"></div>' +
+    '</article>';
+  }).join('');
+
+  $('#todo').innerHTML = TODOS.map(function (t) {
+    return '<li id="li-' + t.id + '"><label><input type="checkbox" id="cb-' + t.id + '"><span>' + esc(t.text) + '</span></label></li>';
+  }).join('');
+
+  /* ---------- render ---------- */
+  function renderTasks() {
+    PARTS.forEach(function (p) {
+      var list = TASKS.filter(function (t) { return partOf(t) === p.n; });
+      var sum = list.reduce(function (a, t) { return a + t.d; }, 0);
+      var hard = list.filter(function (t) { return t.d >= 4; }).length;
+      var avg = list.length ? sum / list.length : 0;
+      $('#sum-' + p.n).innerHTML = list.length
+        ? '<span class="meter">난이도 <span class="pips">' + pips(Math.round(avg), false) + '</span><span class="num5">' + avg.toFixed(1) + '/5</span></span>' +
+          '<span>할 일 <b>' + list.length + '개</b></span>' +
+          '<span>어려운 일 <span class="hardn">' + hard + '개</span></span>'
+        : '<span>할 일이 없어요</span>';
+      $('#tasks-' + p.n).innerHTML = list.length ? list.map(function (t) {
+        var opts = '<option value="">옮기기</option>' + PARTS.map(function (q) {
+          return '<option value="' + q.n + '"' + (q.n === p.n ? ' disabled' : '') + '>' + q.sym + ' ' + esc(q.name) + '</option>';
+        }).join('');
+        var open = (allOpen || openSet[t.id]) ? ' open' : '';
+        return '<li id="task-' + t.id + '"><div class="trow"><div class="tmain"><span class="tn">' + esc(t.t) + '</span><span class="crs">' + esc(t.c) + '</span></div>' +
+          '<div class="tmeta"><span class="meter" role="img" aria-label="난이도 ' + t.d + ' / 5"><span class="pips">' + pips(t.d, t.d >= 4) + '</span><span class="num5">' + t.d + '/5</span></span>' +
+          '<select class="mv" data-id="' + t.id + '" aria-label="' + esc(t.t) + ' 다른 파트로 옮기기"' + (readOnly ? ' disabled' : '') + '>' + opts + '</select></div></div>' +
+          '<details data-id="' + t.id + '"' + open + '><summary>수업 내용 · 난이도 이유</summary>' +
+          '<span class="use"><b>수업</b> ' + esc(t.u) + '</span><span class="use"><b>난이도 이유</b> ' + esc(t.w) + '</span></details></li>';
+      }).join('') : '<li class="empty">비어 있어요. 다른 파트에서 옮겨 올 수 있어요.</li>';
+    });
+  }
+
+  function renderDynamic() {
+    var assigned = 0;
+    PARTS.forEach(function (p) {
+      var a = state.assign[p.n] || { name: '' };
+      var nameEl = $('#name-' + p.n);
+      if (document.activeElement !== nameEl) nameEl.value = a.name || '';
+      nameEl.disabled = readOnly;
+      if (a.name) assigned++;
+    });
+    $('#assigned-count').textContent = '배정 ' + assigned + ' / 4';
+    $('#reset-moves').disabled = readOnly;
+    TODOS.forEach(function (t) {
+      var cb = $('#cb-' + t.id), on = !!state.todo[t.id];
+      cb.checked = on; cb.disabled = readOnly;
+      $('#li-' + t.id).className = on ? 'done' : '';
+    });
+    renderTasks();
+  }
+
+  /* ---------- storage: shared db when available, else this browser ---------- */
+  function lsGet() { try { return JSON.parse(localStorage.getItem('bteam-board') || 'null'); } catch (e) { return null; } }
+  function lsSet() { try { localStorage.setItem('bteam-board', JSON.stringify(state)); } catch (e) {} }
+
+  function write(docId, data) {
+    if (!db) { lsSet(); return; }
+    var ref = db.doc('board/' + docId);
+    queues[docId] = (queues[docId] || Promise.resolve()).then(function () { return ref.set(data); }).catch(function (e) {
+      if (e && e.code === 'invalid_argument') { readOnly = true; renderDynamic(); }
+    });
+  }
+  function saveAssign(n) {
+    var a = { name: $('#name-' + n).value.trim() };
+    state.assign[n] = a; renderDynamic(); write('assign-' + n, a);
+  }
+  PARTS.forEach(function (p) {
+    $('#name-' + p.n).addEventListener('change', function () { saveAssign(p.n); });
+  });
+  TODOS.forEach(function (t) {
+    $('#cb-' + t.id).addEventListener('change', function (e) {
+      state.todo[t.id] = e.target.checked; renderDynamic(); write('todo-' + t.id, { done: e.target.checked });
+    });
+  });
+
+  /* move a task to another part */
+  $('#cards').addEventListener('change', function (e) {
+    var sel = e.target;
+    if (!sel.classList || !sel.classList.contains('mv')) return;
+    var n = parseInt(sel.value, 10);
+    if (!(n >= 1 && n <= 4)) return;
+    var id = sel.getAttribute('data-id');
+    state.move[id] = n; renderDynamic(); write('move-' + id, { part: n });
+  });
+  /* remember which details the viewer opened (toggle does not bubble, so capture) */
+  $('#cards').addEventListener('toggle', function (e) {
+    var id = e.target.getAttribute && e.target.getAttribute('data-id');
+    if (id) openSet[id] = e.target.open;
+  }, true);
+  $('#toggle-all').addEventListener('click', function () {
+    allOpen = !allOpen;
+    if (!allOpen) openSet = {};
+    document.querySelectorAll('#cards details').forEach(function (d) { d.open = allOpen; });
+    $('#toggle-all').textContent = allOpen ? '자세히 모두 접기' : '자세히 모두 펼치기';
+  });
+  $('#reset-moves').addEventListener('click', function () {
+    TASKS.forEach(function (t) {
+      if (state.move[t.id] && state.move[t.id] !== t.home) write('move-' + t.id, { part: t.home });
+    });
+    state.move = {}; renderDynamic(); lsSet();
+  });
+
+  /* ---------- tabs ---------- */
+  var TABS = ['roles', 'schema', 'formats', 'todo'];
+  function showTab(name, setHash) {
+    if (TABS.indexOf(name) < 0) name = 'roles';
+    TABS.forEach(function (t) {
+      var sel = t === name;
+      $('#tab-' + t).setAttribute('aria-selected', sel ? 'true' : 'false');
+      $('#panel-' + t).hidden = !sel;
+    });
+    if (setHash) { try { history.replaceState(null, '', '#' + name); } catch (e) {} }
+  }
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.getAttribute('data-tab'), true); });
+  });
+  showTab((location.hash || '').replace('#', ''), false);
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var pre = document.getElementById(b.getAttribute('data-copy'));
+      var done = function () { b.textContent = '복사됨'; setTimeout(function () { b.textContent = '복사'; }, 1500); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = '선택됨';
+      };
+      try { navigator.clipboard.writeText(pre.textContent).then(done, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+
+  /* ---------- Supabase 저장소 (로그인 없이 공유) ---------- */
+  var SB_URL = 'https://lwyvjbraejczphlrhazn.supabase.co';
+  var SB_KEY = 'sb_publishable_ovCvZ-R1y1hY2ksrqOpdeg_0q-_v_-G';
+  function makeSupabase() {
+    if (!window.supabase || !window.supabase.createClient) return null;
+    var client = window.supabase.createClient(SB_URL, SB_KEY);
+    return {
+      doc: function (path) {
+        var id = path.split('/')[1];
+        return { set: function (data) {
+          return client.from('board').upsert({ id: id, value: data, updated_at: new Date().toISOString() }).then(function (r) { if (r.error) throw r.error; });
+        } };
+      },
+      collection: function () {
+        return { onSnapshot: function (ok, fail) {
+          var failed = false;
+          function load() {
+            client.from('board').select('id,value').then(function (r) {
+              if (r.error) { if (!failed) { failed = true; fail(r.error); } return; }
+              ok({ docs: (r.data || []).map(function (x) { return { id: x.id, data: function () { return x.value; } }; }) });
+            });
+          }
+          load();
+          try { client.channel('board-live').on('postgres_changes', { event: '*', schema: 'public', table: 'board' }, load).subscribe(); } catch (e) {}
+          setInterval(load, 8000);
+        } };
+      }
+    };
+  }
+
+  /* ---------- start ---------- */
+  var saved = lsGet();
+  if (saved) { state = { assign: saved.assign || {}, todo: saved.todo || {}, move: saved.move || {} }; }
+  renderDynamic();
+
+  (async function () {
+    try { db = makeSupabase(); } catch (e) { db = null; }
+    if (!db) {
+      $('#local-note').hidden = false; $('#local-note-2').hidden = false;
+      return;
+    }
+    state = { assign: {}, todo: {}, move: {} };
+    db.collection('board').onSnapshot(function (snap) {
+      state = { assign: {}, todo: {}, move: {} };
+      snap.docs.forEach(function (d) {
+        var v = d.data() || {};
+        if (d.id.indexOf('assign-') === 0) state.assign[d.id.slice(7)] = { name: v.name || '' };
+        else if (d.id.indexOf('todo-') === 0) state.todo[d.id.slice(5)] = !!v.done;
+        else if (d.id.indexOf('move-') === 0) state.move[d.id.slice(5)] = v.part;
+      });
+      renderDynamic();
+    }, function () { db = null; $('#local-note').hidden = false; $('#local-note-2').hidden = false; });
+  })();
+})();
+</script>
+<script>
+(function () {
+  var b = document.getElementById('theme-btn');
+  function cur() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+  function label() { b.textContent = cur() === 'dark' ? '☀ 라이트' : '🌙 다크'; }
+  b.addEventListener('click', function () {
+    var n = cur() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', n);
+    try { localStorage.setItem('bteam-theme', n); } catch (e) {}
+    label();
+  });
+  label();
+})();
+</script>
+</body></html>
