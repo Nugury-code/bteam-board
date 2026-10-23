@@ -263,193 +263,172 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
 
   <section class="panel" id="panel-schema" role="tabpanel" aria-labelledby="tab-schema" hidden>
 <h2 style="margin-bottom:12px">스키마</h2>
-<p class="sub" style="margin-bottom:0">파트끼리 주고받는 것만 모았어요. 형식은 수업 슬라이드를 기준으로 하고 출처 슬라이드 번호를 적었어요. 수업에 없는 필드는 <b>[추가]</b>로 표시했어요. <b>예시 수정</b>으로 같이 고칠 수 있고, 고친 내용은 모두에게 보여요. <span class="tg tg-c">수업</span> 수업 그대로 &nbsp;<span class="tg tg-c">수업+추가</span> 수업 + 우리가 더한 필드 &nbsp;<span class="tg">초안</span> 수업에 없어서 우리가 정함</p>
+<p class="sub" style="margin-bottom:0">파트끼리 주고받는 것만 모았어요. 한 파트 안에서만 쓰는 파일은 각자 정해요. <b>예시 수정</b>으로 같이 고칠 수 있고, 고친 내용은 모두에게 보여요.</p>
 <div class="sflow" aria-label="파트 사이 흐름">
-<a class="fstep" href="#" data-open="login2"><b>파트1·3 로그 남기기</b><span>로그인·정책·방화벽 로그</span></a>
+<a class="fstep" href="#" data-open="log"><b>파트1·3 로그 남기기</b><span>공통 로그</span></a>
 <span class="arr" aria-hidden="true">→</span>
-<a class="fstep" href="#" data-open="detect2"><b>파트2 탐지</b><span>탐지 결과</span></a>
+<a class="fstep" href="#" data-open="detect"><b>파트2 탐지</b><span>탐지 결과</span></a>
 <span class="arr" aria-hidden="true">→</span>
-<a class="fstep" href="#" data-open="action2"><b>파트4 대응 결정</b><span>조치 요청 · 알림 요청</span></a>
+<a class="fstep" href="#" data-open="action"><b>파트4 대응 결정</b><span>조치 요청 · 알림 요청</span></a>
 <span class="arr" aria-hidden="true">→</span>
-<a class="fstep" href="#" data-open="result2"><b>파트1·3 조치 실행</b><span>조치 결과</span></a>
+<a class="fstep" href="#" data-open="result"><b>파트1·3 조치 실행</b><span>조치 결과 · 이력</span></a>
 <span class="arr" aria-hidden="true">→</span>
-<a class="fstep" href="#" data-open="false2"><b>파트4 → 파트2 오탐 확인</b><span>오탐 기록</span></a>
+<a class="fstep" href="#" data-open="false"><b>파트4 → 파트2 오탐 확인</b><span>오탐 기록</span></a>
 </div>
-<section class="sch" id="sch-login2" data-sid="login2">
-<div class="sh"><span class="sn">1</span><h3>로그인 로그</h3><span class="route">파트1 → 파트2</span><span class="tg tg-c">수업</span><span class="tg tg-e" id="sed-login2" hidden>수정됨</span><span class="sf">login_logs.csv</span></div>
-<p class="who">4과목 정규화 실습에서 쓰는 로그인 로그 그대로예요. CSV 한 줄이 아래 JSON 한 건이에요. 4과목은 필드 이름이 user이고 5과목은 username이라, 어느 쪽으로 쓸지는 &quot;정할 것&quot;에 있어요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 4과목 Day1 슬라이드 44·55 (login_logs.csv)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-login2"><div class="sfields" id="sfields-login2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-login2">
+<section class="sch" id="sch-log" data-sid="log">
+<div class="sh"><span class="sn">1</span><h3>공통 로그 (한 줄 = 한 건)</h3><span class="route">파트1·3 → 파트2</span><span class="tg tg-e" id="sed-log" hidden>수정됨</span><span class="sf">access.log</span></div>
+<p class="who">2과목 정책 로그 필드에 source와 reason을 더했어요. 파일은 한 줄에 JSON 하나(JSON Lines)로 저장해요. 결과 값은 4과목처럼 대문자로 적어요(로그인 SUCCESS / FAIL, 접근 ALLOW / DENY).</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-log"><div class="sfields" id="sfields-log"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-log">
 <tr><td class="k">timestamp</td><td>발생 시각 (YYYY-MM-DD HH:MM:SS)</td></tr>
-<tr><td class="k">user</td><td>계정</td></tr>
-<tr><td class="k">src_ip</td><td>접속한 IP</td></tr>
-<tr><td class="k">result</td><td>SUCCESS / FAIL</td></tr>
-</tbody></table></div><div class="sact" id="fbar-login2"><button type="button" class="sbtn" data-fedit="login2">필드 수정</button></div><div class="fedit" id="fedit-login2" data-fid="login2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-login2"><button class="copy" data-copy="ex-login2" type="button">복사</button><pre id="ex-login2" class="jpre">{
-  &quot;timestamp&quot;: &quot;2026-11-02 02:14:05&quot;,
-  &quot;user&quot;: &quot;emp3&quot;,
-  &quot;src_ip&quot;: &quot;192.168.30.12&quot;,
-  &quot;result&quot;: &quot;FAIL&quot;
-}</pre></div>
-<div class="sedit" id="sedit-login2" hidden><textarea id="ta-login2" rows="12" spellcheck="false" aria-label="로그인 로그 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="login2">저장</button><button type="button" class="sbtn" data-cancel="login2">취소</button><button type="button" class="sbtn" data-reset="login2">원래대로</button><span class="smsg" id="smsg-login2"></span></div></div>
-<div class="sact" id="sbar-login2"><button type="button" class="sbtn" data-edit="login2">예시 수정</button><input class="snote" id="note-login2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="로그인 로그 메모"></div>
-</div></div></section>
-<section class="sch" id="sch-access2" data-sid="access2">
-<div class="sh"><span class="sn">2</span><h3>접근 정책 로그</h3><span class="route">파트1 → 파트2</span><span class="tg tg-c">수업+추가</span><span class="tg tg-e" id="sed-access2" hidden>수정됨</span><span class="sf">policy_log.json</span></div>
-<p class="who">2과목에서 배운 정책 로그 7개 필드예요. 접근 허용·차단 결과가 decision(ALLOW/DENY)이에요. src_ip만 우리가 더했어요(IP 기준 탐지에 필요).</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 2과목 Day7 슬라이드 9~12 (정책 로그 주요 필드)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-access2"><div class="sfields" id="sfields-access2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-access2">
-<tr><td class="k">timestamp</td><td>발생 시각</td></tr>
-<tr><td class="k">user</td><td>계정</td></tr>
-<tr><td class="k">resource</td><td>접근 대상</td></tr>
-<tr><td class="k">action</td><td>LOGIN / READ / WRITE / DOWNLOAD / DELETE</td></tr>
-<tr><td class="k">decision</td><td>ALLOW / DENY</td></tr>
-<tr><td class="k">reason</td><td>판단 이유</td></tr>
-<tr><td class="k">risk_score</td><td>접근 요청의 위험 점수</td></tr>
-<tr><td class="k">src_ip</td><td>[추가] 출발지 IP</td></tr>
-</tbody></table></div><div class="sact" id="fbar-access2"><button type="button" class="sbtn" data-fedit="access2">필드 수정</button></div><div class="fedit" id="fedit-access2" data-fid="access2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-access2"><button class="copy" data-copy="ex-access2" type="button">복사</button><pre id="ex-access2" class="jpre">{
-  &quot;timestamp&quot;: &quot;2026-11-02 02:15:30&quot;,
-  &quot;user&quot;: &quot;emp3&quot;,
-  &quot;resource&quot;: &quot;occ/revoke&quot;,
-  &quot;action&quot;: &quot;WRITE&quot;,
-  &quot;decision&quot;: &quot;DENY&quot;,
-  &quot;reason&quot;: &quot;policy_default_deny&quot;,
-  &quot;risk_score&quot;: 78,
-  &quot;src_ip&quot;: &quot;192.168.30.12&quot;
-}</pre></div>
-<div class="sedit" id="sedit-access2" hidden><textarea id="ta-access2" rows="12" spellcheck="false" aria-label="접근 정책 로그 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="access2">저장</button><button type="button" class="sbtn" data-cancel="access2">취소</button><button type="button" class="sbtn" data-reset="access2">원래대로</button><span class="smsg" id="smsg-access2"></span></div></div>
-<div class="sact" id="sbar-access2"><button type="button" class="sbtn" data-edit="access2">예시 수정</button><input class="snote" id="note-access2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="접근 정책 로그 메모"></div>
-</div></div></section>
-<section class="sch" id="sch-fw2" data-sid="fw2">
-<div class="sh"><span class="sn">3</span><h3>방화벽 로그</h3><span class="route">파트3 → 파트2</span><span class="tg tg-c">수업</span><span class="tg tg-e" id="sed-fw2" hidden>수정됨</span><span class="sf">firewall_logs.csv</span></div>
-<p class="who">4과목 정규화 실습의 방화벽 로그 6개 필드 그대로예요. 계정이 없어서 user는 없어요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 4과목 Day1 슬라이드 44·55 (방화벽 로그 정규화 입력)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-fw2"><div class="sfields" id="sfields-fw2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-fw2">
-<tr><td class="k">timestamp</td><td>발생 시각</td></tr>
+<tr><td class="k">source</td><td>로그를 남긴 곳 (firewall / occ)</td></tr>
 <tr><td class="k">src_ip</td><td>출발지 IP</td></tr>
 <tr><td class="k">dst_ip</td><td>목적지 IP</td></tr>
-<tr><td class="k">dst_port</td><td>목적지 포트</td></tr>
-<tr><td class="k">protocol</td><td>TCP / UDP 등</td></tr>
-<tr><td class="k">action</td><td>ALLOW / DENY</td></tr>
-</tbody></table></div><div class="sact" id="fbar-fw2"><button type="button" class="sbtn" data-fedit="fw2">필드 수정</button></div><div class="fedit" id="fedit-fw2" data-fid="fw2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-fw2"><button class="copy" data-copy="ex-fw2" type="button">복사</button><pre id="ex-fw2" class="jpre">{
-  &quot;timestamp&quot;: &quot;2026-11-02 15:05:00&quot;,
-  &quot;src_ip&quot;: &quot;203.0.113.50&quot;,
+<tr><td class="k">user</td><td>계정 (없으면 -)</td></tr>
+<tr><td class="k">role</td><td>역할 (없으면 -)</td></tr>
+<tr><td class="k">resource</td><td>접근 대상</td></tr>
+<tr><td class="k">action</td><td>시도한 동작 (login / access / revoke)</td></tr>
+<tr><td class="k">result</td><td>결과 (로그인: SUCCESS / FAIL, 접근: ALLOW / DENY)</td></tr>
+<tr><td class="k">reason</td><td>실패·차단 사유 (없으면 -)</td></tr>
+</tbody></table></div><div class="sact" id="fbar-log"><button type="button" class="sbtn" data-fedit="log">필드 수정</button></div><div class="fedit" id="fedit-log" data-fid="log" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-log"><button class="copy" data-copy="ex-log" type="button">복사</button><pre id="ex-log" class="jpre">{
+  &quot;timestamp&quot;: &quot;2026-11-02 02:14:05&quot;,
+  &quot;source&quot;: &quot;firewall&quot;,
+  &quot;src_ip&quot;: &quot;192.168.30.12&quot;,
   &quot;dst_ip&quot;: &quot;192.168.10.11&quot;,
-  &quot;dst_port&quot;: 443,
-  &quot;protocol&quot;: &quot;TCP&quot;,
-  &quot;action&quot;: &quot;DENY&quot;
+  &quot;user&quot;: &quot;-&quot;,
+  &quot;role&quot;: &quot;-&quot;,
+  &quot;resource&quot;: &quot;occ/revoke&quot;,
+  &quot;action&quot;: &quot;access&quot;,
+  &quot;result&quot;: &quot;DENY&quot;,
+  &quot;reason&quot;: &quot;policy_default_deny&quot;
 }</pre></div>
-<div class="sedit" id="sedit-fw2" hidden><textarea id="ta-fw2" rows="12" spellcheck="false" aria-label="방화벽 로그 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="fw2">저장</button><button type="button" class="sbtn" data-cancel="fw2">취소</button><button type="button" class="sbtn" data-reset="fw2">원래대로</button><span class="smsg" id="smsg-fw2"></span></div></div>
-<div class="sact" id="sbar-fw2"><button type="button" class="sbtn" data-edit="fw2">예시 수정</button><input class="snote" id="note-fw2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="방화벽 로그 메모"></div>
+<div class="sedit" id="sedit-log" hidden><textarea id="ta-log" rows="12" spellcheck="false" aria-label="공통 로그 (한 줄 = 한 건) 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="log">저장</button><button type="button" class="sbtn" data-cancel="log">취소</button><button type="button" class="sbtn" data-reset="log">원래대로</button><span class="smsg" id="smsg-log"></span></div></div>
+<div class="sact" id="sbar-log"><button type="button" class="sbtn" data-edit="log">예시 수정</button><input class="snote" id="note-log" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="공통 로그 (한 줄 = 한 건) 메모"></div>
 </div></div></section>
-<section class="sch" id="sch-detect2" data-sid="detect2">
-<div class="sh"><span class="sn">4</span><h3>탐지 결과</h3><span class="route">파트2 → 파트4</span><span class="tg tg-c">수업+추가</span><span class="tg tg-e" id="sed-detect2" hidden>수정됨</span><span class="sf">detection_result.json</span></div>
-<p class="who">4과목에서 이벤트 하나에 탐지 결과·위험 점수·우선순위를 붙이던 형식이에요. 위험 점수 등급은 낮음(0~29) 주의(30~59) 높음(60~79) 심각(80~100)이고, 우선순위는 HIGH / MEDIUM / LOW예요. event_type 값 이름은 &quot;정할 것&quot;에 있어요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 4과목 Day3 슬라이드 7·14~16, Day5 슬라이드 8~12 / 5과목 Day2 슬라이드 31(reason)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-detect2"><div class="sfields" id="sfields-detect2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-detect2">
+<section class="sch" id="sch-detect" data-sid="detect">
+<div class="sh"><span class="sn">2</span><h3>탐지 결과</h3><span class="route">파트2 → 파트4</span><span class="tg tg-e" id="sed-detect" hidden>수정됨</span><span class="sf">detections.json</span></div>
+<p class="who">파트2가 만들고 파트4가 읽어요. 4과목 탐지 결과(위험점수, 우선순위)에 5과목 SOAR 이벤트 형식(event_type, asset, impact_scope)을 합쳤어요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-detect"><div class="sfields" id="sfields-detect"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-detect">
 <tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
-<tr><td class="k">user</td><td>대상 계정</td></tr>
-<tr><td class="k">event_type</td><td>이벤트 유형 (예: ABNORMAL_LOGIN)</td></tr>
-<tr><td class="k">detections</td><td>탐지 항목별 결과: unauthorized_access, saas_anomaly, ioc_match, chain_match (true / false)</td></tr>
-<tr><td class="k">risk_score</td><td>0~100</td></tr>
-<tr><td class="k">risk_level</td><td>낮음 / 주의 / 높음 / 심각</td></tr>
+<tr><td class="k">detected_at</td><td>탐지 시각</td></tr>
+<tr><td class="k">rule</td><td>걸린 탐지 룰</td></tr>
+<tr><td class="k">event_type</td><td>이벤트 유형: ABNORMAL_LOGIN(비정상 로그인) / OFFHOUR_LOGIN(업무 외 로그인) / UNAUTHORIZED_ACCESS(비인가 접근) / MALICIOUS_IP(악성 IP) / TRAFFIC_SPIKE(트래픽 급증) / CORRELATED_ATTACK(연관 공격)</td></tr>
+<tr><td class="k">user, src_ip</td><td>대상 계정, 출발지 IP</td></tr>
+<tr><td class="k">risk_score</td><td>위험점수 (0~100)</td></tr>
 <tr><td class="k">priority</td><td>HIGH / MEDIUM / LOW</td></tr>
-<tr><td class="k">asset</td><td>대상 자산</td></tr>
-<tr><td class="k">asset_criticality</td><td>자산 중요도</td></tr>
-<tr><td class="k">reason</td><td>탐지 이유 (5과목 조치 요청에서도 씀)</td></tr>
-<tr><td class="k">src_ip</td><td>[추가] 출발지 IP (IP 차단에 필요)</td></tr>
-<tr><td class="k">detected_at</td><td>[추가] 탐지 시각 (로그 시각 기준)</td></tr>
-</tbody></table></div><div class="sact" id="fbar-detect2"><button type="button" class="sbtn" data-fedit="detect2">필드 수정</button></div><div class="fedit" id="fedit-detect2" data-fid="detect2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-detect2"><button class="copy" data-copy="ex-detect2" type="button">복사</button><pre id="ex-detect2" class="jpre">{
+<tr><td class="k">asset</td><td>대상 자산 (예: occ)</td></tr>
+<tr><td class="k">impact_scope</td><td>영향 범위 (예: single_user)</td></tr>
+<tr><td class="k">evidence</td><td>근거가 된 로그 시각 목록</td></tr>
+</tbody></table></div><div class="sact" id="fbar-detect"><button type="button" class="sbtn" data-fedit="detect">필드 수정</button></div><div class="fedit" id="fedit-detect" data-fid="detect" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-detect"><button class="copy" data-copy="ex-detect" type="button">복사</button><pre id="ex-detect" class="jpre">{
   &quot;event_id&quot;: &quot;EVT-001&quot;,
-  &quot;user&quot;: &quot;emp3&quot;,
+  &quot;detected_at&quot;: &quot;2026-11-02 02:15:00&quot;,
+  &quot;rule&quot;: &quot;failed_login_5_in_10min&quot;,
   &quot;event_type&quot;: &quot;ABNORMAL_LOGIN&quot;,
-  &quot;detections&quot;: {
-    &quot;unauthorized_access&quot;: false,
-    &quot;saas_anomaly&quot;: false,
-    &quot;ioc_match&quot;: false,
-    &quot;chain_match&quot;: true
-  },
-  &quot;risk_score&quot;: 82,
-  &quot;risk_level&quot;: &quot;심각&quot;,
+  &quot;user&quot;: &quot;emp3&quot;,
+  &quot;src_ip&quot;: &quot;192.168.30.12&quot;,
+  &quot;risk_score&quot;: 80,
   &quot;priority&quot;: &quot;HIGH&quot;,
   &quot;asset&quot;: &quot;occ&quot;,
-  &quot;asset_criticality&quot;: &quot;high&quot;,
-  &quot;reason&quot;: &quot;5분 안에 로그인 실패 5회 후 성공&quot;,
-  &quot;src_ip&quot;: &quot;192.168.30.12&quot;,
-  &quot;detected_at&quot;: &quot;2026-11-02 02:15:00&quot;
+  &quot;impact_scope&quot;: &quot;single_user&quot;,
+  &quot;evidence&quot;: [
+    &quot;2026-11-02 02:10:11&quot;,
+    &quot;2026-11-02 02:14:05&quot;
+  ]
 }</pre></div>
-<div class="sedit" id="sedit-detect2" hidden><textarea id="ta-detect2" rows="12" spellcheck="false" aria-label="탐지 결과 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="detect2">저장</button><button type="button" class="sbtn" data-cancel="detect2">취소</button><button type="button" class="sbtn" data-reset="detect2">원래대로</button><span class="smsg" id="smsg-detect2"></span></div></div>
-<div class="sact" id="sbar-detect2"><button type="button" class="sbtn" data-edit="detect2">예시 수정</button><input class="snote" id="note-detect2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="탐지 결과 메모"></div>
+<div class="sedit" id="sedit-detect" hidden><textarea id="ta-detect" rows="12" spellcheck="false" aria-label="탐지 결과 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="detect">저장</button><button type="button" class="sbtn" data-cancel="detect">취소</button><button type="button" class="sbtn" data-reset="detect">원래대로</button><span class="smsg" id="smsg-detect"></span></div></div>
+<div class="sact" id="sbar-detect"><button type="button" class="sbtn" data-edit="detect">예시 수정</button><input class="snote" id="note-detect" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="탐지 결과 메모"></div>
 </div></div></section>
-<section class="sch" id="sch-action2" data-sid="action2">
-<div class="sh"><span class="sn">5</span><h3>조치 요청</h3><span class="route">파트4 → 파트1·3</span><span class="tg tg-c">수업+추가</span><span class="tg tg-e" id="sed-action2" hidden>수정됨</span></div>
-<p class="who">5과목 조치 함수가 받는 값이에요. 함수 이름이 곧 action이고, 계정은 파트1이, IP는 파트3이 실행해요. 어떤 이벤트 때문인지 알려고 event_id만 더했어요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 5과목 Day2 슬라이드 31 (조치 함수 인자: 대상, reason)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-action2"><div class="sfields" id="sfields-action2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-action2">
-<tr><td class="k">action</td><td>lock_account / unlock_account / terminate_session (파트1), block_ip / unblock_ip (파트3)</td></tr>
+<section class="sch" id="sch-action" data-sid="action">
+<div class="sh"><span class="sn">3</span><h3>조치 요청</h3><span class="route">파트4 → 파트1·3</span><span class="tg tg-e" id="sed-action" hidden>수정됨</span></div>
+<p class="who">파트4가 만들고 파트1 계정 조치 또는 파트3 IP 차단이 읽어요. 조치 이름과 대응 등급은 5과목 값을 그대로 써요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-action"><div class="sfields" id="sfields-action"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-action">
+<tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
+<tr><td class="k">action</td><td>lock_account / unlock_account / terminate_session (파트1 실행), block_ip / unblock_ip (파트3 실행)</td></tr>
 <tr><td class="k">target</td><td>계정 또는 IP</td></tr>
-<tr><td class="k">reason</td><td>사유 (해제는 필수)</td></tr>
-<tr><td class="k">event_id</td><td>[추가] 이벤트 번호</td></tr>
-</tbody></table></div><div class="sact" id="fbar-action2"><button type="button" class="sbtn" data-fedit="action2">필드 수정</button></div><div class="fedit" id="fedit-action2" data-fid="action2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-action2"><button class="copy" data-copy="ex-action2" type="button">복사</button><pre id="ex-action2" class="jpre">{
+<tr><td class="k">response_level</td><td>즉시 자동조치 / 승인 후 조치 / 모니터링만</td></tr>
+<tr><td class="k">reason</td><td>사유 (필수)</td></tr>
+<tr><td class="k">dry_run</td><td>true면 실제 조치 없이 기록만</td></tr>
+</tbody></table></div><div class="sact" id="fbar-action"><button type="button" class="sbtn" data-fedit="action">필드 수정</button></div><div class="fedit" id="fedit-action" data-fid="action" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-action"><button class="copy" data-copy="ex-action" type="button">복사</button><pre id="ex-action" class="jpre">{
   &quot;event_id&quot;: &quot;EVT-001&quot;,
-  &quot;action&quot;: &quot;lock_account&quot;,
-  &quot;target&quot;: &quot;emp3&quot;,
-  &quot;reason&quot;: &quot;비정상 로그인 반복&quot;
-}</pre></div>
-<div class="sedit" id="sedit-action2" hidden><textarea id="ta-action2" rows="12" spellcheck="false" aria-label="조치 요청 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="action2">저장</button><button type="button" class="sbtn" data-cancel="action2">취소</button><button type="button" class="sbtn" data-reset="action2">원래대로</button><span class="smsg" id="smsg-action2"></span></div></div>
-<div class="sact" id="sbar-action2"><button type="button" class="sbtn" data-edit="action2">예시 수정</button><input class="snote" id="note-action2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="조치 요청 메모"></div>
-</div></div></section>
-<section class="sch" id="sch-notify2" data-sid="notify2">
-<div class="sh"><span class="sn">6</span><h3>알림 요청</h3><span class="route">파트4 → 파트1</span><span class="tg tg-d">초안</span><span class="tg tg-e" id="sed-notify2" hidden>수정됨</span></div>
-<p class="who">수업에 따로 정해진 형식이 없어서 우리가 최소한으로 정한 거예요. 누가 알림 함수를 부를지도 &quot;정할 것&quot;에 있어요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 수업에 정해진 데이터 형식 없음 (5과목 Day3는 알림·에스컬레이션 동작만 다룸)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-notify2"><div class="sfields" id="sfields-notify2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-notify2">
-<tr><td class="k">event_id</td><td>[추가] 이벤트 번호</td></tr>
-<tr><td class="k">to</td><td>[추가] 알릴 대상</td></tr>
-<tr><td class="k">message</td><td>[추가] 알릴 내용</td></tr>
-</tbody></table></div><div class="sact" id="fbar-notify2"><button type="button" class="sbtn" data-fedit="notify2">필드 수정</button></div><div class="fedit" id="fedit-notify2" data-fid="notify2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-notify2"><button class="copy" data-copy="ex-notify2" type="button">복사</button><pre id="ex-notify2" class="jpre">{
-  &quot;event_id&quot;: &quot;EVT-001&quot;,
-  &quot;to&quot;: &quot;보안 담당자&quot;,
-  &quot;message&quot;: &quot;emp3 계정 잠금 완료&quot;
-}</pre></div>
-<div class="sedit" id="sedit-notify2" hidden><textarea id="ta-notify2" rows="12" spellcheck="false" aria-label="알림 요청 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="notify2">저장</button><button type="button" class="sbtn" data-cancel="notify2">취소</button><button type="button" class="sbtn" data-reset="notify2">원래대로</button><span class="smsg" id="smsg-notify2"></span></div></div>
-<div class="sact" id="sbar-notify2"><button type="button" class="sbtn" data-edit="notify2">예시 수정</button><input class="snote" id="note-notify2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="알림 요청 메모"></div>
-</div></div></section>
-<section class="sch" id="sch-result2" data-sid="result2">
-<div class="sh"><span class="sn">7</span><h3>조치 결과 (조치 이력)</h3><span class="route">파트1·3 → 파트4</span><span class="tg tg-c">수업+추가</span><span class="tg tg-e" id="sed-result2" hidden>수정됨</span><span class="sf">containment_log.json</span></div>
-<p class="who">5과목 log_action이 containment_log.json에 쌓는 기록 그대로예요. result는 성공·실패·건너뜀·승인 필요 네 가지를 써요. 파트4는 이 파일을 읽어서 상태·티켓·리포트를 채워요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 5과목 Day2 슬라이드 31~33 (containment_log.json: 시간, 조치 유형, 대상, 결과, 사유)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-result2"><div class="sfields" id="sfields-result2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-result2">
-<tr><td class="k">timestamp</td><td>조치 시각</td></tr>
-<tr><td class="k">action</td><td>조치 유형</td></tr>
-<tr><td class="k">target</td><td>대상</td></tr>
-<tr><td class="k">result</td><td>success / fail / skipped / approval_required</td></tr>
-<tr><td class="k">reason</td><td>사유</td></tr>
-<tr><td class="k">event_id</td><td>[추가] 이벤트 번호</td></tr>
-<tr><td class="k">dry_run</td><td>[추가] 테스트 모드 여부</td></tr>
-</tbody></table></div><div class="sact" id="fbar-result2"><button type="button" class="sbtn" data-fedit="result2">필드 수정</button></div><div class="fedit" id="fedit-result2" data-fid="result2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-result2"><button class="copy" data-copy="ex-result2" type="button">복사</button><pre id="ex-result2" class="jpre">{
-  &quot;timestamp&quot;: &quot;2026-11-02 02:15:05&quot;,
-  &quot;action&quot;: &quot;lock_account&quot;,
-  &quot;target&quot;: &quot;emp3&quot;,
-  &quot;result&quot;: &quot;success&quot;,
-  &quot;reason&quot;: &quot;비정상 로그인 반복&quot;,
-  &quot;event_id&quot;: &quot;EVT-001&quot;,
+  &quot;action&quot;: &quot;block_ip&quot;,
+  &quot;target&quot;: &quot;192.168.30.12&quot;,
+  &quot;response_level&quot;: &quot;즉시 자동조치&quot;,
+  &quot;reason&quot;: &quot;failed_login_5_in_10min&quot;,
   &quot;dry_run&quot;: false
 }</pre></div>
-<div class="sedit" id="sedit-result2" hidden><textarea id="ta-result2" rows="12" spellcheck="false" aria-label="조치 결과 (조치 이력) 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="result2">저장</button><button type="button" class="sbtn" data-cancel="result2">취소</button><button type="button" class="sbtn" data-reset="result2">원래대로</button><span class="smsg" id="smsg-result2"></span></div></div>
-<div class="sact" id="sbar-result2"><button type="button" class="sbtn" data-edit="result2">예시 수정</button><input class="snote" id="note-result2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="조치 결과 (조치 이력) 메모"></div>
+<div class="sedit" id="sedit-action" hidden><textarea id="ta-action" rows="12" spellcheck="false" aria-label="조치 요청 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="action">저장</button><button type="button" class="sbtn" data-cancel="action">취소</button><button type="button" class="sbtn" data-reset="action">원래대로</button><span class="smsg" id="smsg-action"></span></div></div>
+<div class="sact" id="sbar-action"><button type="button" class="sbtn" data-edit="action">예시 수정</button><input class="snote" id="note-action" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="조치 요청 메모"></div>
 </div></div></section>
-<section class="sch" id="sch-false2" data-sid="false2">
-<div class="sh"><span class="sn">8</span><h3>오탐 기록</h3><span class="route">파트4 → 파트2</span><span class="tg tg-c">수업</span><span class="tg tg-e" id="sed-false2" hidden>수정됨</span><span class="sf">false_positive_feedback.json</span></div>
-<p class="who">5과목 오탐 대응 예제 코드가 저장하는 값 그대로예요. 파트2가 이 파일을 4과목 튜닝의 정답 데이터(is_actual_anomaly)로 써요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 5과목 Day4 슬라이드 37 (record_false_positive)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-false2"><div class="sfields" id="sfields-false2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-false2">
+<section class="sch" id="sch-notify" data-sid="notify">
+<div class="sh"><span class="sn">4</span><h3>알림 요청</h3><span class="route">파트4 → 파트1</span><span class="tg tg-e" id="sed-notify" hidden>수정됨</span></div>
+<p class="who">파트4의 플레이북이 &quot;담당자에게 알린다&quot;를 파트1의 알림·에스컬레이션 함수에 요청해요. 누가 이 함수를 부를지는 팀이 정해야 해요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-notify"><div class="sfields" id="sfields-notify"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-notify">
+<tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
+<tr><td class="k">level</td><td>알림 단계 (1차, 2차)</td></tr>
+<tr><td class="k">to</td><td>알릴 대상 (담당자 이름 또는 역할)</td></tr>
+<tr><td class="k">message</td><td>알릴 내용</td></tr>
+</tbody></table></div><div class="sact" id="fbar-notify"><button type="button" class="sbtn" data-fedit="notify">필드 수정</button></div><div class="fedit" id="fedit-notify" data-fid="notify" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-notify"><button class="copy" data-copy="ex-notify" type="button">복사</button><pre id="ex-notify" class="jpre">{
+  &quot;event_id&quot;: &quot;EVT-001&quot;,
+  &quot;level&quot;: 1,
+  &quot;to&quot;: &quot;보안 담당자&quot;,
+  &quot;message&quot;: &quot;emp3 로그인 실패 반복, IP 차단 완료&quot;
+}</pre></div>
+<div class="sedit" id="sedit-notify" hidden><textarea id="ta-notify" rows="12" spellcheck="false" aria-label="알림 요청 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="notify">저장</button><button type="button" class="sbtn" data-cancel="notify">취소</button><button type="button" class="sbtn" data-reset="notify">원래대로</button><span class="smsg" id="smsg-notify"></span></div></div>
+<div class="sact" id="sbar-notify"><button type="button" class="sbtn" data-edit="notify">예시 수정</button><input class="snote" id="note-notify" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="알림 요청 메모"></div>
+</div></div></section>
+<section class="sch" id="sch-result" data-sid="result">
+<div class="sh"><span class="sn">5</span><h3>조치 결과</h3><span class="route">파트1·3 → 파트4</span><span class="tg tg-e" id="sed-result" hidden>수정됨</span></div>
+<p class="who">파트1·3 함수가 돌려주는 값이에요. 이게 있어야 파트4가 상태를 바꾸고 티켓과 리포트를 채울 수 있어요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-result"><div class="sfields" id="sfields-result"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-result">
+<tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
+<tr><td class="k">action, target</td><td>실행한 조치와 대상</td></tr>
+<tr><td class="k">result</td><td>success / fail / skipped / approval_required</td></tr>
+<tr><td class="k">message</td><td>결과 설명 또는 실패 이유</td></tr>
+<tr><td class="k">timestamp</td><td>실행 시각</td></tr>
+<tr><td class="k">dry_run</td><td>테스트 모드였는지</td></tr>
+</tbody></table></div><div class="sact" id="fbar-result"><button type="button" class="sbtn" data-fedit="result">필드 수정</button></div><div class="fedit" id="fedit-result" data-fid="result" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-result"><button class="copy" data-copy="ex-result" type="button">복사</button><pre id="ex-result" class="jpre">{
+  &quot;event_id&quot;: &quot;EVT-001&quot;,
+  &quot;action&quot;: &quot;block_ip&quot;,
+  &quot;target&quot;: &quot;192.168.30.12&quot;,
+  &quot;result&quot;: &quot;success&quot;,
+  &quot;message&quot;: &quot;iptables rule inserted&quot;,
+  &quot;timestamp&quot;: &quot;2026-11-02 02:15:05&quot;,
+  &quot;dry_run&quot;: false
+}</pre></div>
+<div class="sedit" id="sedit-result" hidden><textarea id="ta-result" rows="12" spellcheck="false" aria-label="조치 결과 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="result">저장</button><button type="button" class="sbtn" data-cancel="result">취소</button><button type="button" class="sbtn" data-reset="result">원래대로</button><span class="smsg" id="smsg-result"></span></div></div>
+<div class="sact" id="sbar-result"><button type="button" class="sbtn" data-edit="result">예시 수정</button><input class="snote" id="note-result" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="조치 결과 메모"></div>
+</div></div></section>
+<section class="sch" id="sch-contain" data-sid="contain">
+<div class="sh"><span class="sn">6</span><h3>조치 이력</h3><span class="route">파트1·3 → 파트4</span><span class="tg tg-e" id="sed-contain" hidden>수정됨</span><span class="sf">containment_log.json</span></div>
+<p class="who">5과목 log_action이 containment_log.json에 쌓는 기록이에요. 함수는 파트3이 만들고 파트1도 불러 써요. 파트4는 이 파일을 읽어 리포트의 &quot;조치 내역&quot;을 채워요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-contain"><div class="sfields" id="sfields-contain"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-contain">
+<tr><td class="k">timestamp</td><td>조치 시각</td></tr>
+<tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
+<tr><td class="k">action, target</td><td>조치와 대상</td></tr>
+<tr><td class="k">reason</td><td>사유 (필수)</td></tr>
+<tr><td class="k">result</td><td>success / fail / skipped / approval_required</td></tr>
+<tr><td class="k">dry_run</td><td>테스트 모드 여부</td></tr>
+</tbody></table></div><div class="sact" id="fbar-contain"><button type="button" class="sbtn" data-fedit="contain">필드 수정</button></div><div class="fedit" id="fedit-contain" data-fid="contain" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-contain"><button class="copy" data-copy="ex-contain" type="button">복사</button><pre id="ex-contain" class="jpre">{
+  &quot;timestamp&quot;: &quot;2026-11-02 02:15:05&quot;,
+  &quot;event_id&quot;: &quot;EVT-001&quot;,
+  &quot;action&quot;: &quot;block_ip&quot;,
+  &quot;target&quot;: &quot;192.168.30.12&quot;,
+  &quot;reason&quot;: &quot;failed_login_5_in_10min&quot;,
+  &quot;result&quot;: &quot;success&quot;,
+  &quot;dry_run&quot;: false
+}</pre></div>
+<div class="sedit" id="sedit-contain" hidden><textarea id="ta-contain" rows="12" spellcheck="false" aria-label="조치 이력 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="contain">저장</button><button type="button" class="sbtn" data-cancel="contain">취소</button><button type="button" class="sbtn" data-reset="contain">원래대로</button><span class="smsg" id="smsg-contain"></span></div></div>
+<div class="sact" id="sbar-contain"><button type="button" class="sbtn" data-edit="contain">예시 수정</button><input class="snote" id="note-contain" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="조치 이력 메모"></div>
+</div></div></section>
+<section class="sch" id="sch-false" data-sid="false">
+<div class="sh"><span class="sn">7</span><h3>오탐 처리 기록</h3><span class="route">파트4 → 파트2</span><span class="tg tg-e" id="sed-false" hidden>수정됨</span><span class="sf">false_positive_feedback.json</span></div>
+<p class="who">5과목 오탐 대응 예제 코드가 저장하는 값 그대로예요. 4과목 튜닝의 정답 데이터(is_actual_anomaly)로 파트2가 읽어요. (정상이면 계정을 푸는 것은 조치 요청의 unlock_account로 파트1에 보내요.)</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-false"><div class="sfields" id="sfields-false"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-false">
 <tr><td class="k">event_id</td><td>이벤트 번호</td></tr>
 <tr><td class="k">username</td><td>계정</td></tr>
 <tr><td class="k">event_type</td><td>이벤트 유형</td></tr>
@@ -459,41 +438,40 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
 <tr><td class="k">false_positive_reason</td><td>오탐 이유</td></tr>
 <tr><td class="k">confirmed_by</td><td>확인한 사람</td></tr>
 <tr><td class="k">recorded_at</td><td>기록 시각</td></tr>
-</tbody></table></div><div class="sact" id="fbar-false2"><button type="button" class="sbtn" data-fedit="false2">필드 수정</button></div><div class="fedit" id="fedit-false2" data-fid="false2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-false2"><button class="copy" data-copy="ex-false2" type="button">복사</button><pre id="ex-false2" class="jpre">{
+</tbody></table></div><div class="sact" id="fbar-false"><button type="button" class="sbtn" data-fedit="false">필드 수정</button></div><div class="fedit" id="fedit-false" data-fid="false" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-false"><button class="copy" data-copy="ex-false" type="button">복사</button><pre id="ex-false" class="jpre">{
   &quot;event_id&quot;: &quot;EVT-003&quot;,
   &quot;username&quot;: &quot;emp1&quot;,
   &quot;event_type&quot;: &quot;suspicious_login&quot;,
   &quot;detected_as_anomaly&quot;: true,
   &quot;risk_score&quot;: 85,
   &quot;is_actual_anomaly&quot;: false,
-  &quot;false_positive_reason&quot;: &quot;해외 출장 중 정상 로그인&quot;,
-  &quot;confirmed_by&quot;: &quot;security_analyst&quot;,
+  &quot;false_positive_reason&quot;: &quot;출장 중 해외 접속&quot;,
+  &quot;confirmed_by&quot;: &quot;admin&quot;,
   &quot;recorded_at&quot;: &quot;2026-11-02 10:00:00&quot;
 }</pre></div>
-<div class="sedit" id="sedit-false2" hidden><textarea id="ta-false2" rows="12" spellcheck="false" aria-label="오탐 기록 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="false2">저장</button><button type="button" class="sbtn" data-cancel="false2">취소</button><button type="button" class="sbtn" data-reset="false2">원래대로</button><span class="smsg" id="smsg-false2"></span></div></div>
-<div class="sact" id="sbar-false2"><button type="button" class="sbtn" data-edit="false2">예시 수정</button><input class="snote" id="note-false2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="오탐 기록 메모"></div>
+<div class="sedit" id="sedit-false" hidden><textarea id="ta-false" rows="12" spellcheck="false" aria-label="오탐 처리 기록 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="false">저장</button><button type="button" class="sbtn" data-cancel="false">취소</button><button type="button" class="sbtn" data-reset="false">원래대로</button><span class="smsg" id="smsg-false"></span></div></div>
+<div class="sact" id="sbar-false"><button type="button" class="sbtn" data-edit="false">예시 수정</button><input class="snote" id="note-false" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="오탐 처리 기록 메모"></div>
 </div></div></section>
-<section class="sch" id="sch-testcase2" data-sid="testcase2">
-<div class="sh"><span class="sn">9</span><h3>테스트 시나리오 결과</h3><span class="route">전원 → 전원</span><span class="tg tg-c">수업+추가</span><span class="tg tg-e" id="sed-testcase2" hidden>수정됨</span><span class="sf">test_result.md</span></div>
-<p class="who">5과목 실습의 테스트 표 방식이에요. 합친 뒤에 돌려 보고 채워요.</p>
-<p class="who" style="font-size:12px;margin-top:-6px">출처: 5과목 Day3 슬라이드 32 (테스트 표)</p>
-<div class="sgrid"><div class="fwrap" id="fwrap-testcase2"><div class="sfields" id="sfields-testcase2"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-testcase2">
+<section class="sch" id="sch-testcase" data-sid="testcase">
+<div class="sh"><span class="sn">8</span><h3>테스트 시나리오 결과</h3><span class="route">전원 → 전원</span><span class="tg tg-e" id="sed-testcase" hidden>수정됨</span><span class="sf">test_result.md</span></div>
+<p class="who">5과목 실습의 테스트 표(TC-01~07) 방식이에요. 합친 뒤에 돌려 보고 채워요.</p>
+<div class="sgrid"><div class="fwrap" id="fwrap-testcase"><div class="sfields" id="sfields-testcase"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-testcase">
 <tr><td class="k">tc_id</td><td>TC-01 같은 번호</td></tr>
-<tr><td class="k">scenario</td><td>상황</td></tr>
+<tr><td class="k">scenario</td><td>상황 (예: 퇴사자 계정으로 접근)</td></tr>
 <tr><td class="k">expected</td><td>기대 결과</td></tr>
-<tr><td class="k">actual</td><td>[추가] 실제 결과</td></tr>
-<tr><td class="k">pass</td><td>[추가] 통과 여부</td></tr>
-</tbody></table></div><div class="sact" id="fbar-testcase2"><button type="button" class="sbtn" data-fedit="testcase2">필드 수정</button></div><div class="fedit" id="fedit-testcase2" data-fid="testcase2" hidden></div></div><div class="sright">
-<div class="code" id="codewrap-testcase2"><button class="copy" data-copy="ex-testcase2" type="button">복사</button><pre id="ex-testcase2" class="jpre">{
+<tr><td class="k">actual</td><td>실제 결과</td></tr>
+<tr><td class="k">pass</td><td>통과 여부</td></tr>
+</tbody></table></div><div class="sact" id="fbar-testcase"><button type="button" class="sbtn" data-fedit="testcase">필드 수정</button></div><div class="fedit" id="fedit-testcase" data-fid="testcase" hidden></div></div><div class="sright">
+<div class="code" id="codewrap-testcase"><button class="copy" data-copy="ex-testcase" type="button">복사</button><pre id="ex-testcase" class="jpre">{
   &quot;tc_id&quot;: &quot;TC-01&quot;,
   &quot;scenario&quot;: &quot;퇴사자 계정으로 OCC 접근&quot;,
   &quot;expected&quot;: &quot;차단 + 티켓 생성&quot;,
   &quot;actual&quot;: &quot;&quot;,
   &quot;pass&quot;: null
 }</pre></div>
-<div class="sedit" id="sedit-testcase2" hidden><textarea id="ta-testcase2" rows="12" spellcheck="false" aria-label="테스트 시나리오 결과 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="testcase2">저장</button><button type="button" class="sbtn" data-cancel="testcase2">취소</button><button type="button" class="sbtn" data-reset="testcase2">원래대로</button><span class="smsg" id="smsg-testcase2"></span></div></div>
-<div class="sact" id="sbar-testcase2"><button type="button" class="sbtn" data-edit="testcase2">예시 수정</button><input class="snote" id="note-testcase2" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="테스트 시나리오 결과 메모"></div>
+<div class="sedit" id="sedit-testcase" hidden><textarea id="ta-testcase" rows="12" spellcheck="false" aria-label="테스트 시나리오 결과 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="testcase">저장</button><button type="button" class="sbtn" data-cancel="testcase">취소</button><button type="button" class="sbtn" data-reset="testcase">원래대로</button><span class="smsg" id="smsg-testcase"></span></div></div>
+<div class="sact" id="sbar-testcase"><button type="button" class="sbtn" data-edit="testcase">예시 수정</button><input class="snote" id="note-testcase" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="테스트 시나리오 결과 메모"></div>
 </div></div></section>
   </section>
 
@@ -551,8 +529,8 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
   ];
   var TODOS = [
     { id: 't1', text: '파트별 담당자 이름 정하기' },
-    { id: 't2', text: '로그 형식 확정 (user/username, src_ip/source_ip, decision/result 중 하나로 통일)' },
-    { id: 't3', text: '탐지 결과·조치 요청·조치 결과 형식 확정 (event_id, event_type 값 이름, 소문자/대문자 통일)' },
+    { id: 't2', text: '공통 로그 스키마 확정 (result와 decision 중 하나로 통일)' },
+    { id: 't3', text: '탐지 결과·조치 요청·조치 결과 스키마 확정 (탐지 결과에 수업 이벤트 형식을 합칠지 포함)' },
     { id: 't4', text: '방화벽 VM에 보안 서버 기능을 합칠지, 보안 서버를 따로 둘지' },
     { id: 't5', text: '인사팀(VLAN40)의 OCC 접근을 허용할지' },
     { id: 't6', text: 'IP 대역 (192.168.10 / 20 / 30 / 40 . 0 / 24 초안 사용 여부)' },
@@ -794,6 +772,7 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
       if (d) { d.scrollIntoView({ block: 'start' }); }
     });
   });
+
 
   /* ---------- tabs ---------- */
   var TABS = ['roles', 'schema', 'todo'];
