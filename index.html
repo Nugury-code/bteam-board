@@ -277,30 +277,28 @@ td.ex { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
 </div>
 <section class="sch" id="sch-log" data-sid="log">
 <div class="sh"><span class="sn">1</span><h3>공통 로그 (한 줄 = 한 건)</h3><span class="route">파트1·3 → 파트2</span><span class="tg tg-e" id="sed-log" hidden>수정됨</span><span class="sf">access.log</span></div>
-<p class="who">2과목 정책 로그 필드에 source와 reason을 더했어요. 파일은 한 줄에 JSON 하나(JSON Lines)로 저장해요. 결과 값은 4과목처럼 대문자로 적어요(로그인 SUCCESS / FAIL, 접근 ALLOW / DENY).</p>
+<p class="who">1파트(OCC 운영툴)가 알려 준 형식이에요. 한 건당 JSON 하나이고, 결과는 success / fail 두 가지예요. 권한 없는 접근은 action이 access_denied로 기록돼요. pfSense 방화벽 로그는 아직 연결 전이라 형식을 정하지 않았어요.</p>
 <div class="sgrid"><div class="fwrap" id="fwrap-log"><div class="sfields" id="sfields-log"><table><thead><tr><th>필드</th><th>뜻</th></tr></thead><tbody id="tb-log">
-<tr><td class="k">timestamp</td><td>발생 시각 (YYYY-MM-DD HH:MM:SS)</td></tr>
-<tr><td class="k">source</td><td>로그를 남긴 곳 (firewall / occ)</td></tr>
-<tr><td class="k">src_ip</td><td>출발지 IP</td></tr>
-<tr><td class="k">dst_ip</td><td>목적지 IP</td></tr>
-<tr><td class="k">user</td><td>계정 (없으면 -)</td></tr>
-<tr><td class="k">role</td><td>역할 (없으면 -)</td></tr>
-<tr><td class="k">resource</td><td>접근 대상</td></tr>
-<tr><td class="k">action</td><td>시도한 동작 (login / access / revoke)</td></tr>
-<tr><td class="k">result</td><td>결과 (로그인: SUCCESS / FAIL, 접근: ALLOW / DENY)</td></tr>
-<tr><td class="k">reason</td><td>실패·차단 사유 (없으면 -)</td></tr>
+<tr><td class="k">time</td><td>발생 시각 (2026-10-26T11:09:58, 날짜와 시각 사이에 T)</td></tr>
+<tr><td class="k">user</td><td>계정 아이디 (로그인 실패 때는 입력한 아이디)</td></tr>
+<tr><td class="k">role</td><td>역할 (운영팀 / 개발팀 / 인사팀 / 관리자)</td></tr>
+<tr><td class="k">src_ip</td><td>접속한 PC의 IP</td></tr>
+<tr><td class="k">target</td><td>접근한 프로그램 (게임 운영툴 / ERP)</td></tr>
+<tr><td class="k">action</td><td>한 동작: login(사원 로그인), admin_login(관리자 로그인), view_payments(결제 내역 조회), download_payments(결제 내역 다운로드), view_users(유저 조회), refund(환불 처리), grant_item(아이템 지급), deactivate(계정 사용 중지), access_denied(권한 없는 페이지 접근 시도)</td></tr>
+<tr><td class="k">detail</td><td>자세한 내용 (결제번호, 지급 내용, 막힌 메뉴 등)</td></tr>
+<tr><td class="k">result</td><td>success 또는 fail (로그인 성공·실패 모두 이 값으로 기록)</td></tr>
+<tr><td class="k">source</td><td>어디서 온 로그 (운영툴)</td></tr>
 </tbody></table></div><div class="sact" id="fbar-log"><button type="button" class="sbtn" data-fedit="log">필드 수정</button></div><div class="fedit" id="fedit-log" data-fid="log" hidden></div></div><div class="sright">
 <div class="code" id="codewrap-log"><button class="copy" data-copy="ex-log" type="button">복사</button><pre id="ex-log" class="jpre">{
-  &quot;timestamp&quot;: &quot;2026-11-02 02:14:05&quot;,
-  &quot;source&quot;: &quot;firewall&quot;,
-  &quot;src_ip&quot;: &quot;192.168.30.12&quot;,
-  &quot;dst_ip&quot;: &quot;192.168.10.11&quot;,
-  &quot;user&quot;: &quot;-&quot;,
-  &quot;role&quot;: &quot;-&quot;,
-  &quot;resource&quot;: &quot;occ/revoke&quot;,
-  &quot;action&quot;: &quot;access&quot;,
-  &quot;result&quot;: &quot;DENY&quot;,
-  &quot;reason&quot;: &quot;policy_default_deny&quot;
+  &quot;time&quot;: &quot;2026-10-26T11:09:58&quot;,
+  &quot;user&quot;: &quot;emp1&quot;,
+  &quot;role&quot;: &quot;개발팀&quot;,
+  &quot;src_ip&quot;: &quot;192.168.30.11&quot;,
+  &quot;target&quot;: &quot;게임 운영툴&quot;,
+  &quot;action&quot;: &quot;access_denied&quot;,
+  &quot;detail&quot;: &quot;refund 권한 없음&quot;,
+  &quot;result&quot;: &quot;fail&quot;,
+  &quot;source&quot;: &quot;운영툴&quot;
 }</pre></div>
 <div class="sedit" id="sedit-log" hidden><textarea id="ta-log" rows="12" spellcheck="false" aria-label="공통 로그 (한 줄 = 한 건) 예시 수정"></textarea><div class="sact"><button type="button" class="sbtn" data-save="log">저장</button><button type="button" class="sbtn" data-cancel="log">취소</button><button type="button" class="sbtn" data-reset="log">원래대로</button><span class="smsg" id="smsg-log"></span></div></div>
 <div class="sact" id="sbar-log"><button type="button" class="sbtn" data-edit="log">예시 수정</button><input class="snote" id="note-log" type="text" maxlength="200" placeholder="메모 (바꾼 이유, 정한 것)" aria-label="공통 로그 (한 줄 = 한 건) 메모"></div>
